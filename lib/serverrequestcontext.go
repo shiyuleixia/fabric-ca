@@ -99,6 +99,8 @@ func (ctx *serverRequestContextImpl) BasicAuthentication() (string, error) {
 	}
 	// Error if max enrollments is disabled for this CA
 	log.Debugf("ca.Config: %+v", ca.Config)
+	log.Debugf("user:%s",username)
+	log.Debugf("password:%s",password)
 	caMaxEnrollments := ca.Config.Registry.MaxEnrollments
 	if caMaxEnrollments == 0 {
 		return "", newAuthErr(ErrEnrollDisabled, "Enroll is disabled")
@@ -380,6 +382,10 @@ func (ctx *serverRequestContextImpl) CanManageUser(user spi.User) error {
 		return err
 	}
 
+	caller ,_:= ctx.GetCaller()
+	if user.GetName() == caller.GetName() {
+		return nil
+	}
 	userType := user.GetType()
 	err = ctx.CanActOnType(userType)
 	if err != nil {
